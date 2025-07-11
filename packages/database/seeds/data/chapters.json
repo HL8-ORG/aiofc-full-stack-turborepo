@@ -1,0 +1,127 @@
+[
+  {
+    "chapterId": "z1z2z3z4z5z6z7z8z9z0a1a2",
+    "sectionId": "a1a2a3a4a5a6a7a8a9a0b1b2",
+    "type": "Video",
+    "title": "什么是 React?",
+    "content": "React 是一个用于构建用户界面的 JavaScript 库。通过基于组件的架构，可以创建可重用的 UI 元素。",
+    "video": "https://example.com/videos/react-intro.mp4",
+    "createdAt": "2025-06-01T09:36:00Z",
+    "updatedAt": "2025-06-08T10:21:00Z"
+  },
+  {
+    "chapterId": "a2a3a4a5a6a7a8a9a0b1b2b3",
+    "sectionId": "a1a2a3a4a5a6a7a8a9a0b1b2",
+    "type": "Text",
+    "title": "理解 JSX 语法",
+    "content": "JSX 是 JavaScript XML 的缩写，它是一种语法扩展，允许在 JavaScript 代码中使用类似 HTML 的语法。这是 React 中表达 UI 的主要方式。",
+    "createdAt": "2025-06-01T09:37:00Z",
+    "updatedAt": "2025-06-08T10:22:00Z"
+  },
+  {
+    "chapterId": "b3b4b5b6b7b8b9b0c1c2c3c4",
+    "sectionId": "a1a2a3a4a5a6a7a8a9a0b1b2",
+    "type": "Quiz",
+    "title": "React 基础测验",
+    "content": "{\"questions\":[{\"question\":\"React 的主要特点是什么?\",\"options\":[\"虚拟 DOM\",\"基于组件\",\"单向数据流\",\"以上全部\"],\"answer\":3}]}",
+    "createdAt": "2025-06-01T09:38:00Z",
+    "updatedAt": "2025-06-08T10:23:00Z"
+  },
+  {
+    "chapterId": "c4c5c6c7c8c9c0d1d2d3d4d5",
+    "sectionId": "b2b3b4b5b6b7b8b9b0c1c2c3",
+    "type": "Video",
+    "title": "useState Hook 的使用方法",
+    "content": "useState 是用于在函数组件中管理状态的 Hook。它返回一个状态变量和用于更新该状态的函数。",
+    "video": "https://example.com/videos/usestate-hook.mp4",
+    "createdAt": "2025-06-01T09:41:00Z",
+    "updatedAt": "2025-06-08T10:26:00Z"
+  },
+  {
+    "chapterId": "d5d6d7d8d9d0e1e2e3e4e5e6",
+    "sectionId": "b2b3b4b5b6b7b8b9b0c1c2c3",
+    "type": "Video",
+    "title": "useEffect Hook 进阶",
+    "content": "useEffect 是一个用于执行组件生命周期相关任务的 Hook。它可以在组件挂载、更新和卸载时执行特定操作。",
+    "video": "https://example.com/videos/useeffect-hook.mp4",
+    "createdAt": "2025-06-01T09:42:00Z",
+    "updatedAt": "2025-06-08T10:27:00Z"
+  },
+  {
+    "chapterId": "e6e7e8e9e0f1f2f3f4f5f6f7",
+    "sectionId": "c3c4c5c6c7c8c9c0d1d2d3d4",
+    "type": "Video",
+    "title": "Next.js 安装和项目创建",
+    "content": "学习如何创建 Next.js 项目并配置开发环境。介绍使用 create-next-app 进行快速启动的方法。",
+    "video": "https://example.com/videos/nextjs-setup.mp4",
+    "createdAt": "2025-06-01T09:46:00Z",
+    "updatedAt": "2025-06-08T10:31:00Z"
+  },
+  {
+    "chapterId": "f7f8f9f0g1g2g3g4g5g6g7g8",
+    "sectionId": "c3c4c5c6c7c8c9c0d1d2d3d4",
+    "type": "Text",
+    "title": "Next.js 路由系统",
+    "content": "理解 Next.js 的基于文件的路由系统，学习如何实现动态路由和嵌套路由。",
+    "createdAt": "2025-06-01T09:47:00Z",
+    "updatedAt": "2025-06-08T10:32:00Z"
+  },
+  {
+    "chapterId": "g8g9g0h1h2h3h4h5h6h7h8h9",
+    "sectionId": "d4d5d6d7d8d9d0e1e2e3e4e5",
+    "type": "Video",
+    "title": "TypeScript 基本类型",
+    "content": "学习 TypeScript 的基本类型（string、number、boolean、array、object 等），以及如何在实际代码中使用它们。",
+    "video": "https://example.com/videos/typescript-basic-types.mp4",
+    "createdAt": "2025-06-02T10:06:00Z",
+    "updatedAt": "2025-06-07T15:06:00Z"
+  },
+  {
+    "chapterId": "h9h0i1i2i3i4i5i6i7i8i9i0",
+    "sectionId": "d4d5d6d7d8d9d0e1e2e3e4e5",
+    "type": "Text",
+    "title": "接口和类型别名",
+    "content": "学习如何在 TypeScript 中使用接口（interface）和类型别名（type alias）来定义和管理复杂类型。",
+    "createdAt": "2025-06-02T10:07:00Z",
+    "updatedAt": "2025-06-07T15:07:00Z"
+  },
+  {
+    "chapterId": "i0i1i2i3i4i5i6i7i8i9i0j1",
+    "sectionId": "e5e6e7e8e9e0f1f2f3f4f5f6",
+    "type": "Video",
+    "title": "泛型类型的应用",
+    "content": "学习如何使用 TypeScript 的泛型来编写可重用且类型安全的代码。",
+    "video": "https://example.com/videos/typescript-generics.mp4",
+    "createdAt": "2025-06-02T10:11:00Z",
+    "updatedAt": "2025-06-07T15:11:00Z"
+  },
+  {
+    "chapterId": "j1j2j3j4j5j6j7j8j9j0k1k2",
+    "sectionId": "f6f7f8f9f0g1g2g3g4g5g6g7",
+    "type": "Video",
+    "title": "Node.js 模块系统",
+    "content": "理解 Node.js 的 CommonJS 和 ES6 模块系统，学习 npm 包管理方法。",
+    "video": "https://example.com/videos/nodejs-modules.mp4",
+    "createdAt": "2025-06-03T11:06:00Z",
+    "updatedAt": "2025-06-08T11:36:00Z"
+  },
+  {
+    "chapterId": "k2k3k4k5k6k7k8k9k0l1l2l3",
+    "sectionId": "g7g8g9g0h1h2h3h4h5h6h7h8",
+    "type": "Video",
+    "title": "Express.js 路由",
+    "content": "学习如何在 Express.js 中配置路由和使用中间件。",
+    "video": "https://example.com/videos/express-routing.mp4",
+    "createdAt": "2025-06-03T11:11:00Z",
+    "updatedAt": "2025-06-08T11:41:00Z"
+  },
+  {
+    "chapterId": "l3l4l5l6l7l8l9l0m1m2m3m4",
+    "sectionId": "h8h9h0i1i2i3i4i5i6i7i8i9",
+    "type": "Text",
+    "title": "HTML 结构和语义化标签",
+    "content": "理解 HTML 的基本结构，学习如何使用语义化标签编写有意义的标记。",
+    "createdAt": "2025-06-04T09:06:00Z",
+    "updatedAt": "2025-06-08T09:36:00Z"
+  }
+]

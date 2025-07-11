@@ -1,0 +1,66 @@
+[
+  {
+    "sectionId": "a1a2a3a4a5a6a7a8a9a0b1b2",
+    "courseId": "x1y2z3a4b5c6d7e8f9g0h1i2",
+    "sectionTitle": "React 基础",
+    "sectionDescription": "学习 React 的基本概念和组件编写方法。",
+    "createdAt": "2025-06-01T09:35:00Z",
+    "updatedAt": "2025-06-08T10:20:00Z"
+  },
+  {
+    "sectionId": "b2b3b4b5b6b7b8b9b0c1c2c3",
+    "courseId": "x1y2z3a4b5c6d7e8f9g0h1i2",
+    "sectionTitle": "React Hooks",
+    "sectionDescription": "深入了解 useState、useEffect 等 React Hooks。",
+    "createdAt": "2025-06-01T09:40:00Z",
+    "updatedAt": "2025-06-08T10:25:00Z"
+  },
+  {
+    "sectionId": "c3c4c5c6c7c8c9c0d1d2d3d4",
+    "courseId": "x1y2z3a4b5c6d7e8f9g0h1i2",
+    "sectionTitle": "Next.js 入门",
+    "sectionDescription": "学习 Next.js 框架的特点和安装方法。",
+    "createdAt": "2025-06-01T09:45:00Z",
+    "updatedAt": "2025-06-08T10:30:00Z"
+  },
+  {
+    "sectionId": "d4d5d6d7d8d9d0e1e2e3e4e5",
+    "courseId": "j3k4l5m6n7o8p9q0r1s2t3u4",
+    "sectionTitle": "TypeScript 基础",
+    "sectionDescription": "学习 TypeScript 的基本类型和接口。",
+    "createdAt": "2025-06-02T10:05:00Z",
+    "updatedAt": "2025-06-07T15:05:00Z"
+  },
+  {
+    "sectionId": "e5e6e7e8e9e0f1f2f3f4f5f6",
+    "courseId": "j3k4l5m6n7o8p9q0r1s2t3u4",
+    "sectionTitle": "高级 TypeScript",
+    "sectionDescription": "学习泛型、联合类型、条件类型等高级功能。",
+    "createdAt": "2025-06-02T10:10:00Z",
+    "updatedAt": "2025-06-07T15:10:00Z"
+  },
+  {
+    "sectionId": "f6f7f8f9f0g1g2g3g4g5g6g7",
+    "courseId": "v5w6x7y8z9a0b1c2d3e4f5g6",
+    "sectionTitle": "Node.js 基础",
+    "sectionDescription": "学习 Node.js 的基本概念和模块系统。",
+    "createdAt": "2025-06-03T11:05:00Z",
+    "updatedAt": "2025-06-08T11:35:00Z"
+  },
+  {
+    "sectionId": "g7g8g9g0h1h2h3h4h5h6h7h8",
+    "courseId": "v5w6x7y8z9a0b1c2d3e4f5g6",
+    "sectionTitle": "Express.js 应用",
+    "sectionDescription": "学习使用 Express.js 构建 Web 服务器。",
+    "createdAt": "2025-06-03T11:10:00Z",
+    "updatedAt": "2025-06-08T11:40:00Z"
+  },
+  {
+    "sectionId": "h8h9h0i1i2i3i4i5i6i7i8i9",
+    "courseId": "h7i8j9k0l1m2n3o4p5q6r7s8",
+    "sectionTitle": "HTML 基础",
+    "sectionDescription": "学习 HTML 的基本标签和结构。",
+    "createdAt": "2025-06-04T09:05:00Z",
+    "updatedAt": "2025-06-08T09:35:00Z"
+  }
+]

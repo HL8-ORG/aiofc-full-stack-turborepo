@@ -1,0 +1,44 @@
+{
+  "name": "lms-next-nestjs",
+  "private": true,
+  "version": "1.0.0",
+  "type": "module",
+  "devDependencies": {
+    "commitizen": "^4.3.1",
+    "cz-customizable": "^7.4.0",
+    "husky": "^8.0.3",
+    "typescript": "^5",
+    "turbo": "^2",
+    "prettier": "^3"
+  },
+  "scripts": {
+    "build": "turbo run build",
+    "build:packages": "turbo run build --filter='@repo/*'",
+    "check-types": "turbo run check-types",
+    "db": "pnpm --filter @repo/database",
+    "db:init": "pnpm db migrate dev --name init",
+    "db:reset": "pnpm docker db:reset && pnpm db migrate dev",
+    "db:seed": "./scripts/seed-database.sh",
+    "dev": "turbo run dev",
+    "dev:auth": "pnpm --filter @apps/auth dev",
+    "dev:api": "pnpm --filter @apps/api dev",
+    "dev:web": "pnpm --filter @apps/web dev",
+    "docker": "pnpm --filter @repo/docker",
+    "format": "prettier --write .",
+    "lint": "turbo run lint",
+    "prepare": "husky install",
+    "test": "turbo run test"
+  },
+  "config": {
+    "commitizen": {
+      "path": "node_modules/cz-customizable"
+    },
+    "cz-customizable": {
+      "config": "cz-config.cjs"
+    }
+  },
+  "packageManager": "pnpm@10.12.1",
+  "engines": {
+    "node": ">=18"
+  }
+}

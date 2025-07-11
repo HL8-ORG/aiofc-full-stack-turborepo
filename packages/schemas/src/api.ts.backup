@@ -1,0 +1,273 @@
+import { z } from 'zod';
+import { idSchema, paginationSchema, sortOrderSchema } from './base';
+
+// ==============================
+// 🎓 API 模式 (从原 common 包迁移)
+// ==============================
+
+// 课程相关枚举模式
+export const courseStatusSchema = z.enum(['Draft', 'Published'], {
+  errorMap: () => ({ message: '课程状态必须是 Draft 或 Published' }),
+});
+
+export const courseLevelSchema = z.enum(
+  ['Beginner', 'Intermediate', 'Advanced'],
+  {
+    errorMap: () => ({
+      message:
+        '课程等级必须是 Beginner、Intermediate、Advanced 中的一个',
+    }),
+  }
+);
+
+export const chapterTypeSchema = z.enum(['Text', 'Video', 'Quiz'], {
+  errorMap: () => ({
+    message: '章节类型必须是 Text、Video、Quiz 中的一个',
+  }),
+});
+
+// 课程创建模式
+export const createCourseSchema = z
+  .object({
+    teacherId: idSchema,
+    teacherName: z
+      .string()
+      .min(1, '教师名称为必填项')
+      .max(100, '教师名称不能超过100字'),
+    title: z
+      .string()
+      .min(1, '课程标题为必填项')
+      .max(200, '课程标题不能超过200字'),
+    description: z
+      .string()
+      .min(10, '课程描述至少需要10个字')
+      .max(2000, '课程描述不能超过2000字')
+      .optional(),
+    category: z
+      .string()
+      .min(1, '分类为必填项')
+      .max(50, '分类不能超过50字'),
+    price: z
+      .number()
+      .min(0, '价格必须大于等于0')
+      .max(50000000, '价格不能超过5千万')
+      .optional(), // 增加到5千万
+    level: courseLevelSchema,
+    status: courseStatusSchema.default('Draft'),
+    image: z.string().url('请输入正确的图片URL格式').optional(),
+  })
+  .strict();
+
+// 课程更新模式
+export const updateCourseSchema = z
+  .object({
+    title: z
+      .string()
+      .min(1, '课程标题为必填项')
+      .max(200, '课程标题不能超过200字')
+      .optional(),
+    description: z
+      .string()
+      .min(10, '课程描述至少需要10个字')
+      .max(2000, '课程描述不能超过2000字')
+      .optional(),
+    category: z
+      .string()
+      .min(1, '分类为必填项')
+      .max(50, '分类不能超过50字')
+      .optional(),
+    price: z
+      .number()
+      .min(0, '价格必须大于等于0')
+      .max(50000000, '价格不能超过5千万')
+      .optional(), // 增加到5千万
+    level: courseLevelSchema.optional(),
+    status: courseStatusSchema.optional(),
+    image: z.string().url('请输入正确的图片URL格式').optional(),
+  })
+  .strict();
+
+// 课程搜索查询模式 (修改版)
+export const courseQuerySchema = paginationSchema
+  .extend({
+    category: z.string().optional(),
+    level: courseLevelSchema.optional(),
+    status: courseStatusSchema.optional(),
+    search: z
+      .string()
+      .max(100, '搜索关键词不能超过100字')
+      .optional(),
+    teacherId: idSchema.optional(),
+    minPrice: z
+      .string()
+      .optional()
+      .transform((val) => {
+        if (!val || val === '') return undefined;
+        const num = parseFloat(val);
+        if (isNaN(num) || num < 0) return undefined;
+        return num;
+      }),
+    maxPrice: z
+      .string()
+      .optional()
+      .transform((val) => {
+        if (!val || val === '') return undefined;
+        const num = parseFloat(val);
+        if (isNaN(num) || num < 0) return undefined;
+        return num;
+      }),
+    sortBy: z
+      .enum(['createdAt', 'updatedAt', 'title', 'price'])
+      .default('createdAt'),
+    sortOrder: sortOrderSchema,
+  })
+  .strict();
+
+// 支付相关模式
+export const paymentProviderSchema = z.enum(['stripe', 'paypal', 'kakao_pay'], {
+  errorMap: () => ({
+    message: '支付提供商必须是 stripe、paypal、kakao_pay 中的一个',
+  }),
+});
+
+// Stripe支付意向创建模式
+export const createStripePaymentIntentSchema = z
+  .object({
+    amount: z
+      .number()
+      .min(0, '支付金额必须大于等于0')
+      .max(
+        99999999,
+        '支付金额不能超过9,999万元 (Stripe韩元限制)'
+      ), // 符合Stripe韩元限制
+    courseId: idSchema, // 添加为必填字段
+    currency: z.string().default('krw'),
+    metadata: z.record(z.string()).optional(),
+  })
+  .strict();
+
+// 交易查询模式
+export const transactionQuerySchema = paginationSchema
+  .extend({
+    userId: idSchema.optional(),
+    courseId: idSchema.optional(),
+    paymentProvider: paymentProviderSchema.optional(),
+    startDate: z.string().datetime().optional(),
+    endDate: z.string().datetime().optional(),
+    minAmount: z
+      .string()
+      .optional()
+      .transform((val) => {
+        if (!val || val === '') return undefined;
+        const num = parseFloat(val);
+        if (isNaN(num) || num < 0) return undefined;
+        return num;
+      }),
+    maxAmount: z
+      .string()
+      .optional()
+      .transform((val) => {
+        if (!val || val === '') return undefined;
+        const num = parseFloat(val);
+        if (isNaN(num) || num < 0) return undefined;
+        return num;
+      }),
+    sortBy: z.enum(['createdAt', 'updatedAt', 'amount']).default('createdAt'),
+    sortOrder: sortOrderSchema,
+  })
+  .strict();
+
+export const createTransactionSchema = z
+  .object({
+    userId: idSchema,
+    courseId: idSchema,
+    transactionId: z
+      .string()
+      .min(1, '交易ID为必填项')
+      .max(100, '交易ID不能超过100字'),
+    amount: z
+      .number()
+      .min(0, '金额必须大于等于0')
+      .max(50000000, '金额不能超过5千万'), // 增加到5千万
+    paymentProvider: paymentProviderSchema,
+  })
+  .strict();
+
+// 学习进度相关模式
+export const chapterProgressSchema = z
+  .object({
+    chapterId: idSchema,
+    completed: z.boolean(),
+    completedAt: z.string().datetime().optional(),
+    timeSpent: z.number().min(0, '学习时间必须大于等于0').optional(), // 单位：秒
+  })
+  .strict();
+
+export const sectionProgressSchema = z
+  .object({
+    sectionId: idSchema,
+    chapters: z.array(chapterProgressSchema),
+  })
+  .strict();
+
+export const updateUserCourseProgressSchema = z
+  .object({
+    sections: z.array(sectionProgressSchema).optional(),
+    overallProgress: z
+      .number()
+      .min(0, '总进度必须大于等于0')
+      .max(100, '总进度不能超过100')
+      .optional(),
+    lastAccessedChapterId: idSchema.optional(),
+  })
+  .strict();
+
+// TypeScript 类型导出
+export type CreateCourseDto = z.infer<typeof createCourseSchema>;
+export type UpdateCourseDto = z.infer<typeof updateCourseSchema>;
+export type CourseQueryDto = z.infer<typeof courseQuerySchema>;
+export type CreateStripePaymentIntentDto = z.infer<
+  typeof createStripePaymentIntentSchema
+>;
+export type TransactionQueryDto = z.infer<typeof transactionQuerySchema>;
+export type CreateTransactionDto = z.infer<typeof createTransactionSchema>;
+export type ChapterProgressDto = z.infer<typeof chapterProgressSchema>;
+export type SectionProgressDto = z.infer<typeof sectionProgressSchema>;
+export type UpdateUserCourseProgressDto = z.infer<
+  typeof updateUserCourseProgressSchema
+>;
+
+// 工具函数
+export function validateCoursePrice(price: number): boolean {
+  return price >= 0 && price <= 50000000; // 增加到5千万
+}
+
+export function calculateCourseProgress(
+  sections: SectionProgressDto[]
+): number {
+  if (!sections.length) return 0;
+
+  const totalChapters = sections.reduce(
+    (sum, section) => sum + section.chapters.length,
+    0
+  );
+  const completedChapters = sections.reduce(
+    (sum, section) =>
+      sum + section.chapters.filter((chapter) => chapter.completed).length,
+    0
+  );
+
+  return totalChapters > 0
+    ? Math.round((completedChapters / totalChapters) * 100)
+    : 0;
+}
+
+export function sanitizeCourseQuery(query: any): CourseQueryDto {
+  const result = courseQuerySchema.safeParse(query);
+  if (!result.success) {
+    throw new Error(
+      `无效的课程查询: ${result.error.errors.map((e) => e.message).join(', ')}`
+    );
+  }
+  return result.data;
+}

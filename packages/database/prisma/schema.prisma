@@ -1,0 +1,361 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum AuthProvider {
+  EMAIL
+  GOOGLE
+  GITHUB
+}
+
+enum UserRole {
+  USER
+  INSTRUCTOR
+}
+
+enum Level {
+  Beginner
+  Intermediate
+  Advanced
+}
+
+enum CourseStatus {
+  Draft
+  Published
+}
+
+enum ChapterType {
+  Text
+  Quiz
+  Video
+}
+
+// model User {
+//   userId      String       @id @default(uuid())
+//   provider    AuthProvider @default(EMAIL)
+//   providerId  String?
+//   email       String?
+//   password    String?
+//   role        UserRole     @default(USER)
+//   name        String?
+//   picture     String?
+//   createdAt   DateTime     @default(now())
+//   updatedAt   DateTime?    @updatedAt
+//   settings    Json?
+
+//   // 🔥 연관 관계
+//   transactions      Transaction[]
+//   courseProgress   UserCourseProgress[]
+//   enrollments      Enrollment[]
+//   comments         Comment[]
+// }
+
+
+
+// 사용자 테이블 - 확장 가능한 구조
+model User {
+  id          String   @id // 🆔 애플리케이션에서 CUID2 직접 생성
+  email       String   @unique
+  username    String?  @unique
+  password    String?  // 소셜 로그인 사용자는 null
+  firstName   String?
+  lastName    String?
+  avatar      String?
+  role        UserRole @default(USER)
+  isActive    Boolean  @default(true)
+  isVerified  Boolean  @default(false)
+
+  // 소셜 로그인 정보
+  socialAccounts SocialAccount[]
+
+  // 보안 관련
+  lastLoginAt    DateTime?
+  passwordChangedAt DateTime?
+
+  // 메타데이터
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  // 사용자 프로필 확장
+  profile     UserProfile?
+
+  // 사용자 설정
+  settings    UserSettings?
+
+  // 🔥 연관 관계
+  transactions     Transaction[]
+  courseProgress   UserCourseProgress[]
+  enrollments      Enrollment[]
+  comments         Comment[]
+
+  // 🚀 성능 최적화 인덱스
+  @@index([role])                    // 역할별 사용자 조회
+  @@index([isActive])               // 활성 사용자 필터링
+  @@index([createdAt])              // 가입일순 정렬
+  @@index([lastLoginAt])            // 최근 로그인 사용자
+  @@index([role, isActive])         // 복합 인덱스: 활성 강사/학생
+  @@map("users")
+}
+
+// 소셜 계정 연결 정보
+model SocialAccount {
+  id           String @id // 🆔 애플리케이션에서 CUID2 직접 생성
+  userId       String
+  provider     String // 'google', 'github' 등
+  providerId   String // 소셜 플랫폼의 사용자 ID
+  providerData Json?  // 추가 소셜 데이터
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@unique([provider, providerId])
+  @@map("social_accounts")
+}
+
+// 사용자 프로필 - 확장 가능
+model UserProfile {
+  id          String @id // 🆔 애플리케이션에서 CUID2 직접 생성
+  userId      String @unique
+  bio         String?
+  location    String?
+  website     String?
+  dateOfBirth DateTime?
+  phone       String?
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@map("user_profiles")
+}
+
+// 사용자 설정
+model UserSettings {
+  id                 String  @id // 🆔 애플리케이션에서 CUID2 직접 생성
+  userId             String  @unique
+  theme              String  @default("light") // light, dark, system
+  language           String  @default("ko")
+  timezone           String  @default("Asia/Seoul")
+  emailNotifications Boolean @default(true)
+  pushNotifications  Boolean @default(true)
+  smsNotifications   Boolean @default(false)
+  twoFactorEnabled   Boolean @default(false)
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@map("user_settings")
+}
+
+// 리프레시 토큰 저장 (옵션 - Redis 대신 DB 사용 시)
+model RefreshToken {
+  id        String   @id // 🆔 애플리케이션에서 CUID2 직접 생성
+  userId    String
+  token     String   @unique
+  expiresAt DateTime
+  isRevoked Boolean  @default(false)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@map("refresh_tokens")
+}
+
+// 로그인 히스토리 (보안 감사용)
+model LoginHistory {
+  id        String   @id // 🆔 애플리케이션에서 CUID2 직접 생성
+  userId    String?
+  email     String
+  success   Boolean
+  ipAddress String?
+  userAgent String?
+  provider  String?  // 'local', 'google', 'github'
+
+  createdAt DateTime @default(now())
+
+  // 🚀 성능 최적화 인덱스
+  @@index([email])                  // 이메일별 로그인 시도 조회
+  @@index([userId])                 // 사용자별 로그인 히스토리
+  @@index([success])                // 성공/실패 로그인 필터링
+  @@index([createdAt])              // 시간순 정렬
+  @@index([ipAddress])              // IP별 로그인 시도 추적
+  @@index([email, success, createdAt]) // 복합 인덱스: 보안 분석용
+  @@map("login_history")
+}
+
+
+
+
+model Transaction {
+  transactionId    String  @id // 🆔 애플리케이션에서 CUID2 직접 생성
+  userId           String
+  dateTime         DateTime @default(now())
+  courseId         String
+  paymentProvider  String
+  amount           Int
+
+  // 🔥 관계 설정 (강의와 연결)
+  course  Course  @relation(fields: [courseId], references: [courseId], onDelete: Cascade)
+  user    User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+  
+  // 🚀 성능 최적화 인덱스
+  @@index([userId])                 // 사용자별 결제 내역
+  @@index([courseId])               // 강의별 결제 내역
+  @@index([dateTime])               // 시간순 정렬
+  @@index([paymentProvider])        // 결제 수단별 조회
+  @@index([userId, dateTime])       // 복합: 사용자 결제 내역 시간순
+  @@map("transactions")
+}
+
+model UserCourseProgress {
+  userId              String
+  courseId            String
+  enrollmentDate      DateTime @default(now())
+  overallProgress     Float   @default(0)
+  lastAccessedTimestamp DateTime @default(now())
+  sections            Json
+
+  // 🔥 관계 설정
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+  course Course @relation(fields: [courseId], references: [courseId], onDelete: Cascade)
+
+  @@id([userId, courseId])
+  // 🚀 성능 최적화 인덱스
+  @@index([userId])                        // 사용자별 수강 진도
+  @@index([courseId])                      // 강의별 수강생 진도
+  @@index([overallProgress])               // 진도율별 정렬
+  @@index([lastAccessedTimestamp])         // 최근 접속순 정렬
+  @@index([userId, lastAccessedTimestamp]) // 복합: 사용자 최근 학습 내역
+  @@map("user_course_progress")
+}
+
+
+model Course {
+  courseId    String    @id // 🆔 애플리케이션에서 CUID2 직접 생성
+  teacherId   String
+  teacherName String
+  title       String
+  description String?
+  category    String
+  image       String?
+  price       Int?
+  level       Level
+  status      CourseStatus
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+
+  // 🔥 관계 설정
+  sections        Section[]
+  transactions    Transaction[]
+  userCourseProgress UserCourseProgress[]
+  enrollments    Enrollment[]
+  comments       Comment[]
+
+  // 🚀 성능 최적화 인덱스
+  @@index([teacherId])              // 강사별 강의 조회
+  @@index([category])               // 카테고리별 검색
+  @@index([status])                 // 게시 상태별 필터링
+  @@index([level])                  // 난이도별 필터링
+  @@index([createdAt])              // 생성일순 정렬
+  @@index([price])                  // 가격대별 검색
+  @@index([status, category])       // 복합: 공개 강의 카테고리 검색
+  @@index([teacherId, status])      // 복합: 강사의 공개 강의
+  // TODO: PostgreSQL 전체 텍스트 검색은 따로 구현 예정
+  @@map("courses")
+}
+
+model Section {
+  sectionId         String    @id // 🆔 애플리케이션에서 CUID2 직접 생성
+  courseId          String
+  course           Course @relation(fields: [courseId], references: [courseId], onDelete: Cascade)
+  sectionTitle     String
+  sectionDescription String?
+  orderIndex       Int       @default(0) // 섹션 순서 정렬용 인덱스
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+
+  chapters        Chapter[]
+
+  // 🚀 성능 최적화 인덱스
+  @@index([courseId])               // 강의별 섹션 조회
+  @@index([courseId, orderIndex])   // 강의별 섹션 순서 정렬
+  @@index([createdAt])              // 생성순 정렬
+  // TODO: PostgreSQL 전체 텍스트 검색은 따로 구현 예정
+  @@map("sections")
+}
+
+model Chapter {
+  chapterId  String @id // 🆔 애플리케이션에서 CUID2 직접 생성
+  sectionId  String
+  section    Section @relation(fields: [sectionId], references: [sectionId], onDelete: Cascade)
+  type       ChapterType
+  title      String
+  content    String
+  orderIndex Int         @default(0) // 챕터 순서 정렬용 인덱스
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+
+  comments   Comment[]
+  video      String?
+
+  // 🚀 성능 최적화 인덱스
+  @@index([sectionId])              // 섹션별 챕터 조회
+  @@index([sectionId, orderIndex])  // 섹션별 챕터 순서 정렬
+  @@index([type])                   // 챕터 타입별 필터링
+  @@index([createdAt])              // 생성순 정렬
+  // TODO: PostgreSQL 전체 텍스트 검색은 따로 구현 예정
+  @@map("chapters")
+}
+
+model Comment {
+  commentId   String @id // 🆔 애플리케이션에서 CUID2 직접 생성
+  userId      String
+  chapterId   String
+  text        String
+  timestamp   DateTime @default(now())
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  // 🔥 관계 설정
+  user    User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+  chapter Chapter @relation(fields: [chapterId], references: [chapterId], onDelete: Cascade)
+
+  // 🚀 성능 최적화 인덱스
+  @@index([chapterId])              // 챕터별 댑글 조회
+  @@index([userId])                 // 사용자별 댑글 내역
+  @@index([createdAt])              // 시간순 정렬
+  @@index([chapterId, createdAt])   // 복합: 챕터 댑글 시간순
+  @@map("comments")
+  Course Course[]
+}
+
+model Enrollment {
+  userId      String
+  courseId    String
+  enrolledAt  DateTime @default(now())
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  // 🔥 관계 설정
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+  course Course @relation(fields: [courseId], references: [courseId], onDelete: Cascade)
+
+  @@id([userId, courseId])
+  @@map("enrollments")
+}

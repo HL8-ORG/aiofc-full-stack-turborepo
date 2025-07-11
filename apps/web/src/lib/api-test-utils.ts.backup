@@ -1,0 +1,110 @@
+/**
+ * API 连接测试的工具函数
+ */
+
+export const testApiConnection = async () => {
+  const baseUrl = process.env.NEXT_PUBLIC_API_BASE_URL || '/api';
+  console.log('🧪 开始 API 连接测试...');
+  console.log('🔗 基础 URL:', baseUrl);
+
+  try {
+    // 1. 基础 API 路径测试
+    const healthCheckUrl = `${baseUrl}/health`;
+    console.log('📡 健康检查请求:', healthCheckUrl);
+    
+    const healthResponse = await fetch(healthCheckUrl, {
+      method: 'GET',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+    });
+    
+    console.log('📊 健康检查响应:', {
+      status: healthResponse.status,
+      statusText: healthResponse.statusText,
+      headers: Object.fromEntries(healthResponse.headers.entries()),
+    });
+
+    // 2. 课程 API 测试
+    const coursesUrl = `${baseUrl}/courses`;
+    console.log('📡 课程 API 请求:', coursesUrl);
+    
+    const coursesResponse = await fetch(coursesUrl, {
+      method: 'GET',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+    });
+    
+    console.log('📊 课程 API 响应:', {
+      status: coursesResponse.status,
+      statusText: coursesResponse.statusText,
+      headers: Object.fromEntries(coursesResponse.headers.entries()),
+    });
+
+    if (coursesResponse.ok) {
+      const coursesData = await coursesResponse.json();
+      console.log('✅ 课程数据:', coursesData);
+    }
+
+    return {
+      healthCheck: healthResponse.status,
+      coursesApi: coursesResponse.status,
+    };
+  } catch (error) {
+    console.error('❌ API 测试出错:', error);
+    throw error;
+  }
+};
+
+export const testSpecificCourseUpdate = async (courseId: string) => {
+  const baseUrl = process.env.NEXT_PUBLIC_API_BASE_URL || '/api';
+  const updateUrl = `${baseUrl}/courses/${courseId}`;
+  
+  console.log('🧪 测试特定课程更新 URL:', updateUrl);
+  
+  try {
+    // OPTIONS 请求检查允许的方法
+    const optionsResponse = await fetch(updateUrl, {
+      method: 'OPTIONS',
+    });
+    
+    console.log('📊 OPTIONS 响应:', {
+      status: optionsResponse.status,
+      headers: Object.fromEntries(optionsResponse.headers.entries()),
+    });
+    
+    return optionsResponse.status;
+  } catch (error) {
+    console.error('❌ OPTIONS 请求失败:', error);
+    throw error;
+  }
+};
+
+export const validateFormData = (formData: FormData) => {
+  console.log('🔍 开始表单数据验证...');
+  
+  const requiredFields = ['title', 'description', 'category', 'price', 'status'];
+  const missingFields: string[] = [];
+  
+  for (const field of requiredFields) {
+    const value = formData.get(field);
+    if (!value || (typeof value === 'string' && !value.trim())) {
+      missingFields.push(field);
+    }
+  }
+  
+  if (missingFields.length > 0) {
+    console.error('❌ 缺少必填字段:', missingFields);
+    return {
+      isValid: false,
+      missingFields,
+    };
+  }
+  
+  console.log('✅ 表单数据验证通过');
+  return {
+    isValid: true,
+    missingFields: [],
+  };
+};
