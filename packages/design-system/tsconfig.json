@@ -1,6 +1,7 @@
 {
-  "extends": "@repo/typescript-config/nextjs.json",
+  "extends": "@repo/typescript-config/base.json",
   "compilerOptions": {
+    "jsx": "react-jsx",
     "baseUrl": ".",
     "plugins": [
       {
@@ -16,9 +17,7 @@
     "**/*.ts",
     "**/*.tsx",
     "global.d.ts",
-    "../../examples/boilerplate/src/components/file-dropzone.tsx",
-    "../../examples/boilerplate/src/components/post-example.tsx",
-    "../../examples/boilerplate/src/modules/calendar/components/ui/date-time-picker.tsx"
+  
   ],
   "exclude": ["node_modules"]
 }

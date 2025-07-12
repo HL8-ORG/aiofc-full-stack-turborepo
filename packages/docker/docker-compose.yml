@@ -9,7 +9,15 @@ services:
       - "5432:5432"
     volumes:
       - /var/lib/postgresql/data
-
+  pgadmin:
+    image: dpage/pgadmin4
+    environment:
+      - PGADMIN_DEFAULT_EMAIL=admin@admin.com
+      - PGADMIN_DEFAULT_PASSWORD=admin
+    ports:
+      - 5050:80
+    depends_on:
+      - postgres
   redis:
     image: redis:6.2-alpine
     ports:

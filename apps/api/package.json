@@ -3,7 +3,6 @@
   "private": true,
   "version": "1.0.0",
   "main": "dist/main.js",
-  "exports": {},
   "scripts": {
     "build": "tsup --clean",
     "check-types": "tsc --noEmit",
