@@ -7,9 +7,9 @@
     "commitizen": "^4.3.1",
     "cz-customizable": "^7.4.0",
     "husky": "^8.0.3",
-    "typescript": "^5",
+    "prettier": "^3",
     "turbo": "^2",
-    "prettier": "^3"
+    "typescript": "^5.8.3"
   },
   "scripts": {
     "build": "turbo run build",
@@ -22,12 +22,16 @@
     "dev": "turbo run dev",
     "dev:auth": "pnpm --filter @apps/auth dev",
     "dev:api": "pnpm --filter @apps/api dev",
+    "dev:starter": "pnpm --filter @examples/starter dev",
     "dev:web": "pnpm --filter @apps/web dev",
     "docker": "pnpm --filter @repo/docker",
     "format": "prettier --write .",
     "lint": "turbo run lint",
     "prepare": "husky install",
-    "test": "turbo run test"
+    "test": "turbo run test",
+    "bump-ui": "npx shadcn@latest add --all --overwrite -c packages/design-system",
+    "clean": "git clean -xdf node_modules",
+    "libs:fix": "pnpm dlx sherif@latest --fix"
   },
   "config": {
     "commitizen": {

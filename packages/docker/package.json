@@ -8,7 +8,5 @@
   "scripts": {
     "dev": "docker compose up",
     "db:reset": "docker compose rm --force --stop postgres && docker compose up -d"
-  },
-  "dependencies": {},
-  "devDependencies": {}
+  }
 }

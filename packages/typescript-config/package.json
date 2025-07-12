@@ -10,7 +10,6 @@
     "access": "public"
   },
   "scripts": {},
-  "dependencies": {},
   "devDependencies": {
     "@tsconfig/node20": "^20.1.4"
   }

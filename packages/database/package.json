@@ -44,7 +44,7 @@
     "@repo/typescript-config": "workspace:^",
     "@swc/core": "^1.11.31",
     "@types/bcryptjs": "^3.0.0",
-    "@types/node": "^20.19.0",
+    "@types/node": "^22.15.30",
     "nodemon": "^3.1.10",
     "prisma": "^6.9.0",
     "tsup": "^8.5.0",

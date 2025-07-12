@@ -18,15 +18,15 @@
     "type-check": "tsc --noEmit"
   },
   "dependencies": {
-    "zod": "^3.23.8"
+    "zod": "^3.25.67"
   },
   "devDependencies": {
     "@repo/eslint-config": "workspace:^",
     "@repo/schemas": "workspace:^",
     "@repo/typescript-config": "workspace:^",
-    "@swc/core": "^1",
-    "tsup": "^8",
-    "typescript": "^5"
+    "@swc/core": "^1.11.31",
+    "tsup": "^8.5.0",
+    "typescript": "^5.8.3"
   },
   "keywords": [],
   "author": "",
