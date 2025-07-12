@@ -5,7 +5,10 @@ import helmet from 'helmet';
 import cookieParser from 'cookie-parser';
 import { Request, Response, NextFunction } from 'express';
 
-// 扩展 Request 接口
+/**
+ * @description 扩展 Express Request 接口,添加请求ID字段
+ * @mechanism 通过 declare global 扩展全局类型定义
+ */
 declare global {
   namespace Express {
     interface Request {
@@ -15,17 +18,38 @@ declare global {
 }
 
 /**
- * 🛡️ 安全中间件配置
- * 为所有 NestJS 应用配置通用的安全中间件
+ * @description 安全中间件配置函数
+ * @param app NestJS 应用实例
+ * @param configService 配置服务实例
+ * 
+ * @mechanism
+ * 1. Cookie解析:
+ *    - 解析请求中的cookie信息
+ *    - 支持签名cookie验证
+ * 
+ * 2. 压缩处理:
+ *    - 使用gzip算法压缩响应内容
+ *    - 可配置压缩级别和阈值
+ *    - 支持过滤特定请求
+ * 
+ * 3. 安全头设置:
+ *    - CSP: 内容安全策略配置
+ *    - HSTS: 强制HTTPS
+ *    - 引用策略控制
+ * 
+ * 4. CORS跨域:
+ *    - 配置允许的源
+ *    - 控制跨域请求方法
+ *    - 设置预检请求缓存
  */
 export function setupSecurityMiddleware(
   app: INestApplication,
   configService: ConfigService
 ): void {
-  // 🍪 Cookie 解析器
+  // Cookie 解析器配置
   app.use(cookieParser());
 
-  // 🗜️ 压缩中间件
+  // 压缩中间件配置
   app.use(compression({
     level: 6, // 压缩级别 (1-9, 6是较好的平衡点)
     threshold: 1024, // 只压缩大于1KB的文件
@@ -38,7 +62,7 @@ export function setupSecurityMiddleware(
     }
   }));
 
-  // 🛡️ 安全头设置
+  // Helmet 安全头配置
   app.use(
     helmet({
       contentSecurityPolicy: {
@@ -65,7 +89,7 @@ export function setupSecurityMiddleware(
     })
   );
 
-  // 🌐 CORS 配置
+  // CORS 跨域配置
   const corsConfig = configService.get('security.cors');
   app.enableCors({
     origin: corsConfig?.allowedOrigins || [
@@ -93,8 +117,14 @@ export function setupSecurityMiddleware(
 }
 
 /**
- * 🔧 开发环境专用中间件
- * 配置仅在开发时需要的中间件
+ * @description 开发环境专用中间件配置
+ * @param app NestJS 应用实例
+ * @param configService 配置服务实例
+ * 
+ * @mechanism
+ * - 仅在开发环境中启用
+ * - 配置更宽松的内容安全策略
+ * - 允许开发所需的不安全内容
  */
 export function setupDevelopmentMiddleware(
   app: INestApplication,
@@ -104,7 +134,6 @@ export function setupDevelopmentMiddleware(
     return;
   }
 
-  // 在开发环境中应用更宽松的 CSP 策略
   app.use(
     helmet({
       contentSecurityPolicy: {
@@ -121,8 +150,18 @@ export function setupDevelopmentMiddleware(
 }
 
 /**
- * 🔍 请求日志中间件
- * 记录请求/响应日志（在开发环境中详细记录）
+ * @description 请求日志中间件配置
+ * @param app NestJS 应用实例
+ * @param configService 配置服务实例
+ * 
+ * @mechanism
+ * 1. 请求追踪:
+ *    - 生成唯一请求ID
+ *    - 在响应头中返回请求ID
+ * 
+ * 2. 日志记录:
+ *    - 开发环境下详细记录请求信息
+ *    - 可配置敏感数据记录选项
  */
 export function setupRequestLogging(
   app: INestApplication,
@@ -131,13 +170,10 @@ export function setupRequestLogging(
   const isDevelopment = process.env.NODE_ENV === 'development';
   const logSensitiveData = configService.get('security.logging.logSensitiveData', false);
 
-  // 添加请求 ID 中间件
   app.use((req: Request, res: Response, next: NextFunction) => {
-    // 生成请求 ID (用于追踪)
     req.requestId = `${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
     res.setHeader('x-request-id', req.requestId);
     
-    // 仅在开发环境中详细记录
     if (isDevelopment && logSensitiveData) {
       console.log(`🔍 [${req.requestId}] ${req.method} ${req.url}`);
       console.log(`   User-Agent: ${req.get('User-Agent')}`);
@@ -149,14 +185,22 @@ export function setupRequestLogging(
 }
 
 /**
- * 📊 健康检查端点配置
- * 添加基本的健康检查端点
+ * @description 健康检查端点配置
+ * @param app NestJS 应用实例
+ * @param serviceName 服务名称
+ * 
+ * @mechanism
+ * 1. 健康检查端点:
+ *    - 返回服务状态信息
+ *    - 包含内存使用、运行时间等指标
+ * 
+ * 2. Ping测试:
+ *    - 提供简单的可用性检查
  */
 export function setupHealthCheck(
   app: INestApplication,
   serviceName: string
 ): void {
-  // 基本健康检查路由
   app.use('/health', (req: Request, res: Response) => {
     res.json({
       status: 'ok',
@@ -168,33 +212,33 @@ export function setupHealthCheck(
     });
   });
 
-  // 简单的 ping 端点
   app.use('/ping', (req: Request, res: Response) => {
     res.send('pong');
   });
 }
 
 /**
- * 🏗️ 全局中间件配置
- * 一次性配置所有必需的中间件
+ * @description 全局中间件配置函数
+ * @param app NestJS 应用实例
+ * @param configService 配置服务实例
+ * @param serviceName 服务名称
+ * 
+ * @mechanism
+ * 按照以下顺序配置中间件:
+ * 1. 请求日志(最先执行)
+ * 2. 安全中间件
+ * 3. 开发环境中间件
+ * 4. 健康检查
+ * 5. API路由前缀
  */
 export function setupAllMiddleware(
   app: INestApplication,
   configService: ConfigService,
   serviceName: string
 ): void {
-  // 请求日志（最先执行）
   setupRequestLogging(app, configService);
-  
-  // 安全中间件
   setupSecurityMiddleware(app, configService);
-  
-  // 开发环境专用中间件
   setupDevelopmentMiddleware(app, configService);
-  
-  // 健康检查端点
   setupHealthCheck(app, serviceName);
-  
-  // API 前缀设置
   app.setGlobalPrefix('api/v1');
 }

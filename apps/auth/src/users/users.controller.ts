@@ -158,7 +158,7 @@ export class UsersController {
   @UseGuards(JwtAuthGuard)
   async updateCurrentUser(
     @CurrentUser('userId') userId: string,
-    @Body() updateUserDto: any, // 临时使用 any
+    @Body() updateUserDto: UpdateUserDto, // 临时使用 any
   ) {
     try {
       this.logger.debug(`更新数据: ${JSON.stringify(updateUserDto)}`);
@@ -200,7 +200,7 @@ export class UsersController {
   @UseGuards(JwtAuthGuard)
   async updateProfile(
     @CurrentUser('userId') userId: string,
-    @Body() updateProfileDto: any, // 临时使用 any
+    @Body() updateProfileDto: UpdateProfileDto, // 临时使用 any
   ) {
     try {
       this.logger.debug(`档案更新数据: ${JSON.stringify(updateProfileDto)}`);
@@ -288,7 +288,7 @@ export class UsersController {
   @HttpCode(HttpStatus.OK)
   async deleteAccount(
     @CurrentUser('userId') userId: string,
-    @Body() deleteDto: any, // 临时使用 any
+    @Body() deleteDto: DeleteAccountDto, // 临时使用 any
   ) {
     try {
       this.logger.debug(`账户删除数据: ${JSON.stringify(deleteDto)}`);

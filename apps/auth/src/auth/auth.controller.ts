@@ -1,3 +1,27 @@
+/**
+ * @file auth.controller.ts
+ * @description 认证控制器,处理用户认证相关的请求
+ * @module auth/controller
+ * 
+ * @mechanism
+ * 1. 认证流程:
+ *    - 注册: 创建新用户并存储加密密码
+ *    - 登录: 验证凭据并签发JWT令牌
+ *    - 刷新: 使用刷新令牌获取新访问令牌
+ *    - 登出: 使令牌失效
+ * 
+ * 2. 安全机制:
+ *    - JWT令牌认证
+ *    - 密码加密存储
+ *    - 令牌轮换
+ *    - IP和设备追踪
+ * 
+ * 3. 数据验证:
+ *    - Zod schema验证
+ *    - DTO类型检查
+ *    - Swagger文档
+ */
+
 import {
   Controller,
   Post,
@@ -48,187 +72,23 @@ import {
   type UpdateProfileDto,
 } from '@repo/schemas';
 
-// Swagger 响应 DTO 类
-class SuccessResponseDto {
-  @ApiProperty()
-  success: boolean;
+import { SuccessResponseDto } from './dto/success-response.dto';
+import { AuthTokensDto } from './dto/auth-tokens.dto';
+import { UserDto } from './dto/user.dto';
+import { LoginResponseDto } from './dto/login-response.dto';
+import { RegisterResponseDto } from './dto/register-response.dto';
+import { ErrorResponseDto } from './dto/error-response.dto';
+import { LoginRequestDto } from './dto/login-request.dto';
+import { RegisterRequestDto } from './dto/register-request.dto';
+import { RefreshTokenRequestDto } from './dto/refresh-token-request.dto';
+import { PasswordStrengthRequestDto } from './dto/password-strength-request.dto';
+import { UpdateProfileRequestDto } from './dto/update-profile-request.dto';
 
-  @ApiProperty()
-  message: string;
-
-  @ApiProperty()
-  data?: any;
-}
-
-class AuthTokensDto {
-  @ApiProperty({ description: '访问令牌' })
-  accessToken: string;
-
-  @ApiProperty({ description: '刷新令牌' })
-  refreshToken: string;
-
-  @ApiProperty({ description: '令牌过期时间' })
-  expiresIn: number;
-}
-
-class UserDto {
-  @ApiProperty({ description: '用户 ID' })
-  id: string;
-
-  @ApiProperty({ description: '邮箱' })
-  email: string;
-
-  @ApiProperty({ description: '用户名' })
-  username: string;
-
-  @ApiProperty({ description: '姓名' })
-  name: string;
-
-  @ApiProperty({ description: '角色', enum: ['USER', 'ADMIN', 'INSTRUCTOR'] })
-  role: string;
-}
-
-class LoginResponseDto extends SuccessResponseDto {
-  @ApiProperty({
-    type: 'object',
-    description: '登录成功数据',
-    properties: {
-      user: {
-        type: 'object',
-        properties: {
-          id: { type: 'string', example: 'm3n4o5p6q7r8s9t0u1v2w3x4' },
-          email: { type: 'string', example: 'student1@example.com' },
-          username: { type: 'string', example: 'student_park' },
-          name: { type: 'string', example: '朴学生' },
-          role: { type: 'string', example: 'USER' }
-        }
-      },
-      tokens: {
-        type: 'object',
-        properties: {
-          accessToken: { type: 'string', example: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...' },
-          refreshToken: { type: 'string', example: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...' },
-          expiresIn: { type: 'number', example: 900 }
-        }
-      }
-    }
-  })
-  data: {
-    user: UserDto;
-    tokens: AuthTokensDto;
-  };
-}
-
-class RegisterResponseDto extends SuccessResponseDto {
-  @ApiProperty({
-    type: 'object',
-    description: '注册成功数据',
-    properties: {
-      user: {
-        type: 'object',
-        properties: {
-          id: { type: 'string', example: 'a1b2c3d4e5f6g7h8i9j0k1l2' },
-          email: { type: 'string', example: 'newuser@example.com' },
-          username: { type: 'string', example: 'newuser' },
-          name: { type: 'string', example: '洪吉童' },
-          role: { type: 'string', example: 'USER' }
-        }
-      }
-    }
-  })
-  data: {
-    user: UserDto;
-  };
-}
-
-class ErrorResponseDto {
-  @ApiProperty()
-  success: boolean;
-
-  @ApiProperty()
-  statusCode: number;
-
-  @ApiProperty()
-  error: string;
-
-  @ApiProperty()
-  message: string | object;
-
-  @ApiProperty()
-  timestamp: string;
-
-  @ApiProperty()
-  path: string;
-
-  @ApiProperty()
-  method: string;
-}
-
-// 请求 DTO 类
-class LoginRequestDto {
-  @ApiProperty({ example: 'student1@example.com', description: '用户邮箱' })
-  email: string;
-
-  @ApiProperty({ example: 'password123', description: '密码' })
-  password: string;
-}
-
-class RegisterRequestDto {
-  @ApiProperty({ example: 'newuser@example.com', description: '用户邮箱' })
-  email: string;
-
-  @ApiProperty({ example: 'Password123!', description: '密码 (至少8位,包含大小写字母、数字和特殊字符)' })
-  password: string;
-
-  @ApiProperty({ example: 'newuser', description: '用户名 (可选)' })
-  username?: string;
-
-  @ApiProperty({ example: '洪', description: '名字 (可选)' })
-  firstName?: string;
-
-  @ApiProperty({ example: '吉童', description: '姓氏 (可选)' })
-  lastName?: string;
-}
-
-class RefreshTokenRequestDto {
-  @ApiProperty({ example: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...', description: '刷新令牌' })
-  refreshToken: string;
-}
-
-class PasswordStrengthRequestDto {
-  @ApiProperty({ example: 'MyStrongPassword123!', description: '需要检查强度的密码' })
-  password: string;
-}
-
-class UpdateProfileRequestDto {
-  @ApiProperty({ example: 'newusername', description: '用户名 (可选)', required: false })
-  username?: string;
-
-  @ApiProperty({ example: '金', description: '名字 (可选)', required: false })
-  firstName?: string;
-
-  @ApiProperty({ example: '哲洙', description: '姓氏 (可选)', required: false })
-  lastName?: string;
-
-  @ApiProperty({ example: '你好,我是一名开发者', description: '个人简介 (可选)', required: false })
-  bio?: string;
-
-  @ApiProperty({ example: '首尔,韩国', description: '位置 (可选)', required: false })
-  location?: string;
-
-  @ApiProperty({ example: 'https://example.com', description: '网站 (可选)', required: false })
-  website?: string;
-
-  @ApiProperty({ example: '1990-01-01', description: '出生日期 (YYYY-MM-DD) (可选)', required: false })
-  dateOfBirth?: string;
-
-  @ApiProperty({ example: '010-1234-5678', description: '电话号码 (可选)', required: false })
-  phone?: string;
-
-  @ApiProperty({ example: 'https://example.com/avatar.jpg', description: '头像 URL (可选)', required: false })
-  avatar?: string;
-}
-
+/**
+ * @class AuthController
+ * @description 认证控制器类
+ * @mechanism 处理所有认证相关的HTTP请求
+ */
 @ApiTags('🔐 认证 (Authentication)')
 @ApiExtraModels(
   LoginRequestDto,

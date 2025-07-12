@@ -35,7 +35,7 @@ import { JwtStrategy } from './auth/strategies/jwt.strategy';
     ConfigModule.forRoot({
       isGlobal: true,
       load: [databaseConfig, jwtConfig, redisConfig],
-      envFilePath: ['.env.local', '.env.development'],
+      envFilePath: ['.env.local'],
     }),
 
     // Passport 模块

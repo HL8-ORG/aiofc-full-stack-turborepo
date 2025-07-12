@@ -22,10 +22,16 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
     }
 
     super({
+      // 从请求头中提取 JWT 令牌
       jwtFromRequest: ExtractJwt.fromAuthHeaderAsBearerToken(),
+      // 不忽略过期时间, 如果过期则抛出异常
+      // 为了明确起见，我们选择默认的 false 设置，
+      // 它将确保 JWT 没有过期的责任委托给 Passport 模块。
+      // 这意味着，如果我们的路由提供了一个过期的 JWT ，请求将被拒绝，并发送 401 未经授权的响应。Passport 会自动为我们办理
       ignoreExpiration: false,
+      // 使用配置的 JWT 密钥
       secretOrKey: jwtSecret,
-      // 额外安全选项
+      // 不传递请求对象到回调函数
       passReqToCallback: false,
     });
 

@@ -63,17 +63,11 @@ export class JwtStrategy extends PassportStrategy(Strategy, 'jwt') {
 
       // 查询用户（为优化性能只选择必要字段）
       const user = await this.usersService.findById(payload.sub, {
-        select: {
-          id: true,
-          email: true,
-          username: true,
-          firstName: true,
-          lastName: true,
-          role: true,
-          isVerified: true,
-          isActive: true,
-          lastLoginAt: true
-        }
+        include: {
+          profile: false,
+          settings: false,
+          socialAccounts: false,
+        },
       });
 
       if (!user) {

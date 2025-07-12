@@ -1,15 +1,30 @@
+/**
+ * @file performance.middleware.ts
+ * @description 性能监控中间件,用于监控和分析请求性能指标
+ * @module common/middleware/performance
+ */
+
 import { Injectable, NestMiddleware, Logger } from '@nestjs/common';
 import { Request, Response, NextFunction } from 'express';
 
-// 扩展 Request 接口
+/**
+ * @description 扩展 Express Request 接口,添加性能监控相关字段
+ * @mechanism 通过 declare global 扩展全局类型定义
+ */
 declare global {
   namespace Express {
     interface Request {
+      /** 请求唯一标识 */
       requestId?: string;
+      /** 请求开始时间 */
       startTime?: bigint;
+      /** 性能指标数据 */
       performanceMetrics?: {
+        /** 开始时间戳 */
         startTime: bigint;
+        /** 内存使用基准值 */
         memoryUsageBefore: NodeJS.MemoryUsage;
+        /** CPU使用基准值 */
         cpuUsageBefore: NodeJS.CpuUsage;
       };
     }
@@ -17,62 +32,108 @@ declare global {
 }
 
 /**
- * 📊 性能指标接口
+ * @interface PerformanceMetric
+ * @description 性能指标数据结构
+ * @mechanism 记录请求的完整性能数据,包括:
+ * - 基本信息(ID、方法、URL等)
+ * - 时间指标(响应时间)
+ * - 资源使用(内存、CPU)
+ * - 客户端信息(IP、UA)
  */
 interface PerformanceMetric {
+  /** 请求唯一标识 */
   requestId: string;
+  /** HTTP 方法 */
   method: string;
+  /** 请求URL */
   url: string;
+  /** HTTP状态码 */
   statusCode: number;
-  duration: number; // 毫秒
+  /** 响应时间(毫秒) */
+  duration: number;
+  /** 内存使用情况 */
   memoryUsage: {
+    /** 请求开始时内存使用 */
     before: NodeJS.MemoryUsage;
+    /** 请求结束时内存使用 */
     after: NodeJS.MemoryUsage;
+    /** 内存使用变化 */
     delta: {
+      /** 常驻集大小变化 */
       rss: number;
+      /** 已用堆内存变化 */
       heapUsed: number;
+      /** 总堆内存变化 */
       heapTotal: number;
+      /** 外部内存变化 */
       external: number;
     };
   };
+  /** CPU使用情况 */
   cpuUsage: {
+    /** 请求开始时CPU使用 */
     before: NodeJS.CpuUsage;
+    /** 请求结束时CPU使用 */
     after: NodeJS.CpuUsage;
+    /** CPU使用变化 */
     delta: {
+      /** 用户CPU时间变化 */
       user: number;
+      /** 系统CPU时间变化 */
       system: number;
     };
   };
+  /** 用户代理字符串 */
   userAgent?: string;
+  /** 客户端IP */
   ip: string;
+  /** 时间戳 */
   timestamp: string;
 }
 
 /**
- * 🚀 性能监控中间件
- * 
- * 功能:
- * - 测量每个请求的响应时间
- * - 跟踪内存使用变化
- * - 监控 CPU 使用情况
- * - 自动检测并通知慢请求
- * - 生成结构化性能日志
+ * @class PerformanceMiddleware
+ * @description 性能监控中间件类
+ * @mechanism 通过以下机制实现性能监控:
+ * 1. 请求生命周期跟踪
+ * 2. 资源使用监控
+ * 3. 性能指标收集
+ * 4. 异常情况告警
+ * 5. 数据统计分析
  */
 @Injectable()
 export class PerformanceMiddleware implements NestMiddleware {
+  /** 日志记录器实例 */
   private readonly logger = new Logger(PerformanceMiddleware.name);
-  private readonly slowResponseThreshold = 1000; // 1秒
-  private readonly memoryLeakThreshold = 50 * 1024 * 1024; // 50MB
+  /** 慢响应阈值(毫秒) */
+  private readonly slowResponseThreshold = 1000;
+  /** 内存泄漏阈值(字节) */
+  private readonly memoryLeakThreshold = 50 * 1024 * 1024;
   
-  // 性能统计
+  /** 
+   * 性能统计数据
+   * @mechanism 记录全局性能指标,用于分析系统整体表现
+   */
   private performanceStats = {
+    /** 总请求数 */
     totalRequests: 0,
+    /** 慢请求数 */
     slowRequests: 0,
+    /** 平均响应时间 */
     averageResponseTime: 0,
+    /** 最大响应时间 */
     maxResponseTime: 0,
+    /** 总响应时间 */
     totalResponseTime: 0,
   };
 
+  /**
+   * @description 中间件主函数,处理每个HTTP请求
+   * @mechanism 
+   * 1. 记录请求开始时的基准数据
+   * 2. 生成请求唯一标识
+   * 3. 注册响应完成和错误事件处理
+   */
   use(req: Request, res: Response, next: NextFunction): void {
     // 记录请求开始时间
     const startTime = process.hrtime.bigint();
@@ -105,7 +166,14 @@ export class PerformanceMiddleware implements NestMiddleware {
   }
 
   /**
-   * 📊 收集和分析性能指标
+   * @description 收集和分析性能指标
+   * @mechanism 
+   * 1. 计算响应时间
+   * 2. 计算资源使用变化
+   * 3. 生成完整性能指标
+   * 4. 更新统计数据
+   * 5. 记录性能日志
+   * 6. 检查性能警告
    */
   private collectPerformanceMetrics(req: Request, res: Response): void {
     if (!req.performanceMetrics) {
@@ -163,7 +231,12 @@ export class PerformanceMiddleware implements NestMiddleware {
   }
 
   /**
-   * 📈 更新性能统计
+   * @description 更新性能统计数据
+   * @mechanism 
+   * 1. 累计请求计数
+   * 2. 计算平均响应时间
+   * 3. 更新最大响应时间
+   * 4. 统计慢请求数量
    */
   private updatePerformanceStats(metric: PerformanceMetric): void {
     this.performanceStats.totalRequests++;
@@ -181,7 +254,12 @@ export class PerformanceMiddleware implements NestMiddleware {
   }
 
   /**
-   * 📝 记录性能日志
+   * @description 记录性能日志
+   * @mechanism 
+   * 1. 根据环境和性能指标决定日志级别
+   * 2. 记录基本性能日志
+   * 3. 记录详细性能指标
+   * 4. 记录警告日志
    */
   private logPerformanceMetric(metric: PerformanceMetric): void {
     const isSlowRequest = metric.duration > this.slowResponseThreshold;
@@ -222,7 +300,11 @@ export class PerformanceMiddleware implements NestMiddleware {
   }
 
   /**
-   * 🚨 检查性能警告并发送通知
+   * @description 检查性能警告并发送通知
+   * @mechanism 监控三种异常情况:
+   * 1. 慢响应
+   * 2. 内存泄漏
+   * 3. 服务器错误
    */
   private checkPerformanceAlerts(metric: PerformanceMetric): void {
     // 慢响应警告
@@ -242,7 +324,8 @@ export class PerformanceMiddleware implements NestMiddleware {
   }
 
   /**
-   * 🐌 发送慢响应通知
+   * @description 发送慢响应通知
+   * @mechanism 通过日志和Slack(如果配置)发送警告
    */
   private sendSlowResponseAlert(metric: PerformanceMetric): void {
     const message = `🐌 检测到慢响应
@@ -261,7 +344,8 @@ export class PerformanceMiddleware implements NestMiddleware {
   }
 
   /**
-   * 🧠 发送内存泄漏通知
+   * @description 发送内存泄漏通知
+   * @mechanism 通过日志和Slack(如果配置)发送警告
    */
   private sendMemoryLeakAlert(metric: PerformanceMetric): void {
     const message = `🧠 内存使用急剧增加
@@ -279,7 +363,8 @@ export class PerformanceMiddleware implements NestMiddleware {
   }
 
   /**
-   * 💥 发送服务器错误通知
+   * @description 发送服务器错误通知
+   * @mechanism 通过日志和Slack(如果配置)发送警告
    */
   private sendServerErrorAlert(metric: PerformanceMetric): void {
     const message = `💥 发生服务器错误
@@ -299,7 +384,8 @@ User-Agent: ${metric.userAgent}
   }
 
   /**
-   * 📱 发送 Slack 通知
+   * @description 发送Slack通知
+   * @mechanism 通过Webhook发送消息到Slack频道
    */
   private async sendSlackAlert(message: string): Promise<void> {
     try {
@@ -315,14 +401,20 @@ User-Agent: ${metric.userAgent}
   }
 
   /**
-   * 🆔 生成请求 ID
+   * @description 生成请求唯一标识
+   * @mechanism 使用时间戳和随机字符串组合生成
    */
   private generateRequestId(): string {
     return `${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
   }
 
   /**
-   * 🌐 提取客户端 IP
+   * @description 提取客户端IP地址
+   * @mechanism 按优先级尝试不同的IP来源:
+   * 1. Cloudflare IP
+   * 2. X-Forwarded-For
+   * 3. X-Real-IP
+   * 4. 连接远程地址
    */
   private extractClientIp(req: Request): string {
     const forwardedFor = req.headers['x-forwarded-for'] as string;
@@ -340,7 +432,8 @@ User-Agent: ${metric.userAgent}
   }
 
   /**
-   * 📏 格式化字节单位
+   * @description 格式化字节数为可读字符串
+   * @mechanism 自动选择合适的单位(B、KB、MB、GB)
    */
   private formatBytes(bytes: number): string {
     if (bytes === 0) return '0 B';
@@ -352,7 +445,8 @@ User-Agent: ${metric.userAgent}
   }
 
   /**
-   * 📊 获取当前性能统计
+   * @description 获取当前性能统计数据
+   * @mechanism 返回聚合的性能指标和系统状态
    */
   getPerformanceStats() {
     const slowRequestRate = this.performanceStats.totalRequests > 0 
