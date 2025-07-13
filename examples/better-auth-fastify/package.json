@@ -1,5 +1,5 @@
 {
-  "name": "@apps/better-auth-api",
+  "name": "@examples/better-auth-fastify",
   "private": true,
   "version": "1.0.0",
   "main": "dist/main.js",
