@@ -9,8 +9,6 @@
   },
   "include": [
     "src/**/*.ts",
-		"src/generated/prisma/client/**/*.js",
-		"src/generated/prisma/client/**/*.d.ts"
   ],
   "exclude": ["node_modules", "test", "dist"]
 }

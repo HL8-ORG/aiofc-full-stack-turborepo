@@ -176,7 +176,7 @@ const config = {
       "value": "prisma-client-js"
     },
     "output": {
-      "value": "/home/arligle/Aiofix/aiofc-full-stack-turbo/apps/server/generated/client",
+      "value": "/home/arligle/Aiofix/aiofc-full-stack-turbo/apps/better-auth-api/generated/client",
       "fromEnvVar": null
     },
     "config": {
@@ -190,12 +190,11 @@ const config = {
       }
     ],
     "previewFeatures": [],
-    "sourceFilePath": "/home/arligle/Aiofix/aiofc-full-stack-turbo/apps/server/prisma/schema.prisma",
+    "sourceFilePath": "/home/arligle/Aiofix/aiofc-full-stack-turbo/apps/better-auth-api/prisma/schema.prisma",
     "isCustomOutput": true
   },
   "relativeEnvPaths": {
-    "rootEnvPath": "../../.env",
-    "schemaEnvPath": "../../.env"
+    "rootEnvPath": null
   },
   "relativePath": "../../prisma",
   "clientVersion": "6.11.1",

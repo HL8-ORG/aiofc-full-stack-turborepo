@@ -9,10 +9,6 @@
   },
   "include": [
     "src/**/*.ts",
-    "src/courses/dto/course.dto.ts.backup",
-    "src/courses/interfaces/course.interface.ts.backup",
-    "src/transactions/dto/transaction.dto.ts.backup",
-    "src/user-course-progress/dto/user-course-progress.dto.ts.backup"
   ],
   "exclude": ["node_modules", "test", "dist"]
 }

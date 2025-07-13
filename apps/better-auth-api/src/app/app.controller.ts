@@ -1,5 +1,5 @@
 import { Controller, Get, Logger, Res } from '@nestjs/common';
-import { AppService } from './app.service';
+import { AppService } from '../app/app.service';
 
 /**
  * 🏠 API 主控制器

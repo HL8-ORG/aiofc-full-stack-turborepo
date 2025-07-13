@@ -1,6 +1,6 @@
-import { betterAuth } from "better-auth";
+import { betterAuth, BetterAuthOptions } from "better-auth";
 import { prismaAdapter } from "better-auth/adapters/prisma";
-import { PrismaClient } from "../generated/client";
+import { PrismaClient } from "../../generated/client";
 import { admin } from "better-auth/plugins";
 
 const prisma = new PrismaClient();
@@ -9,7 +9,7 @@ export const auth = betterAuth({
 		provider: "postgresql",
 	}),
 	secret: process.env.BETTER_AUTH_SECRET,
-	trustedOrigins: ["http://localhost:3001"],
+	trustedOrigins: ["http://localhost:3000"],
 	plugins: [
 		admin({
 			adminUserIds: ["SWp4kVpPGfUvuXbGoso3hpPXyIWxg6EI"],
@@ -19,4 +19,4 @@ export const auth = betterAuth({
 		enabled: true,
 		async sendResetPassword(data, request) {},
 	},
-});
+} as BetterAuthOptions);

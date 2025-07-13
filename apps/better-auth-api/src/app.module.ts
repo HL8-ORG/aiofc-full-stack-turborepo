@@ -1,9 +1,10 @@
 import { Module } from '@nestjs/common';
 import { ConfigModule } from '@nestjs/config';
 // 模块
-import { AppController } from './app.controller';
-import { AppService } from './app.service';
-// 守卫、过滤器、拦截器（通用包）
+import { AppController } from './app/app.controller';
+import { AppService } from './app/app.service';
+import { AuthModule, auth as options } from "./better-auth";
+
 
 @Module({
   imports: [
@@ -13,14 +14,13 @@ import { AppService } from './app.service';
       envFilePath: ['.env.local'],
     }),
 
-    
+    AuthModule.forRoot({
+      auth: options,
+    }),
   ],
   controllers: [AppController],
-  providers: [
-    AppService,
-    
-  ],
+  providers: [AppService],
   // 导出以供其他模块使用
-  exports: [],
+  // exports: [],
 })
 export class AppModule {}

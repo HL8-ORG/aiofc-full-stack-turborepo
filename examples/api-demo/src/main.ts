@@ -3,8 +3,6 @@ import { Logger } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { NestExpressApplication } from '@nestjs/platform-express';
 import { AppModule } from './app.module';
-import { AllExceptionsFilter } from '@repo/common';
-import helmet from 'helmet';
 import { join } from 'path';
 
 async function bootstrap() {
@@ -17,24 +15,8 @@ async function bootstrap() {
     // 提供静态文件服务（图标等）
     app.useStaticAssets(join(__dirname, '..', 'public'));
 
-    // 安全中间件
-    app.use(
-      helmet({
-        contentSecurityPolicy: {
-          directives: {
-            defaultSrc: ["'self'"],
-            styleSrc: ["'self'", "'unsafe-inline'"],
-            scriptSrc: ["'self'"],
-            imgSrc: ["'self'", 'data:', 'https:'],
-          },
-        },
-        crossOriginResourcePolicy: { policy: 'cross-origin' },
-      })
-    );
 
-    // 压缩中间件
 
-    // Cookie解析器
 
     // CORS配置
     app.enableCors({
@@ -50,7 +32,6 @@ async function bootstrap() {
     });
 
     // 全局异常过滤器（包含Zod错误处理）
-    app.useGlobalFilters(new AllExceptionsFilter());
 
     // API前缀设置
     app.setGlobalPrefix('api/v1');
